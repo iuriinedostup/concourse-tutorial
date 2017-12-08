@@ -1,0 +1,58 @@
+resources:
+  - name: super-app-inedostup
+    type: git
+    source:
+      uri: https://github.com/iuriinedostup/concourse-tutorial.git
+      branch: test-ci
+
+  - name: release-rc
+    type: github-release
+    source:
+      user: iuriinedostup
+      repository: concourse-tutorial
+      access_token: {{github_token}}
+      pre_release: true
+
+jobs:
+  - name: Initial testing
+    plan:
+    - get: super-app-inedostup
+      trigger: true
+
+#    - put: super-app-inedostup
+#      params: {path: super-app-inedostup, context: Unit tests, status: pending}
+
+    - aggregate:
+      - task: lint
+        file: super-app-inedostup/ci/tasks/lint.yml
+
+      - task: unit
+        file: super-app-inedostup/ci/tasks/unit.yml
+
+  - name: Master build
+    plan:
+    - get: super-app-inedostup
+      passed: ['Initial testing']
+      trigger: true
+
+    - aggregate:
+      - task: build linux
+        file: super-app-inedostup/tutorial/scenario.4/tasks/build_linux.yml
+
+      - task: build darwin
+        file: super-app-inedostup/tutorial/scenario.4/tasks/build_darwin.yml
+
+      - task: build windows
+        file: super-app-inedostup/tutorial/scenario.4/tasks/build_windows.yml
+
+    - put: release-rc
+      params: {path: super-app-inedostup, context: Master build, status: pending}
+
+
+#    on_failure:
+#      put: release-rc
+#      params: {path: super-app-inedostup, context: Master build, status: failure}
+#
+#    on_success:
+#      put: release-rc
+#      params: {path: super-app-inedostup, context: Master build, status: success}

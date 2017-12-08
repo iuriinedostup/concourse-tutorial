@@ -1,15 +1,25 @@
+resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: jtarchie/pr
+
 resources:
   - name: super-app-inedostup
-    type: git
+    type: pull-request
     source:
-      branch: ci
-      uri: https://github.com/iuriinedostup/concourse-tutorial.git
+      repo: iuriinedostup/concourse-tutorial
+      access_token: {{github_token}}
 
 jobs:
-  - name: Testing
+  - name: PR unit testing
     plan:
     - get: super-app-inedostup
       trigger: true
+
+    - put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: pending}
+
     - aggregate:
       - task: lint
         file: super-app-inedostup/ci/tasks/lint.yml
@@ -17,14 +27,34 @@ jobs:
       - task: unit
         file: super-app-inedostup/ci/tasks/unit.yml
 
+    on_failure:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: failure}
+
+    on_success:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: success}
+
+
   - name: Building and integration test
     plan:
     - get: super-app-inedostup
-      passed: ['Testing']
+      passed: ['PR unit testing']
       trigger: true
+
+    - put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Building and integration tests, status: pending}
 
     - task: build
       file: super-app-inedostup/ci/tasks/build.yml
 
     - task: integration test
       file: super-app-inedostup/ci/tasks/integration.yml
+
+    on_failure:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Building and integration tests, status: failure}
+
+    on_success:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Building and integration tests, status: success}
