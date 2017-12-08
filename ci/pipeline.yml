@@ -24,41 +24,7 @@ jobs:
       trigger: true
 
     - task: build
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: {repository: golang}
-        run:
-          path: sh
-          args:
-          - -exc
-          - |
-            ./scripts/go_deps.sh
-            ./scripts/go_build.sh linux 0.0.1
-            mv super_*_linux_amd64 ../artifact
-          dir: super-app-inedostup
-
-        inputs:
-          - name: super-app-inedostup
-        outputs:
-          - name: artifact
+      file: super-app-inedostup/ci/tasks/build.yml
 
     - task: integration test
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: {repository: golang}
-        run:
-          path: sh
-          args:
-          - -exc
-          - |
-            ./artifact/super_*_linux_amd64&
-            ./super-app-inedostup/scripts/test_integeration.sh http://127.0.0.1:8080
-            kill -9 `pgrep super_`
-
-        inputs:
-          - name: super-app-inedostup
-          - name: artifact
+      file: super-app-inedostup/ci/tasks/integration.yml
