@@ -19,8 +19,8 @@ jobs:
     - get: super-app-inedostup
       trigger: true
 
-    - put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Unit tests, status: pending}
+#    - put: super-app-inedostup
+#      params: {path: super-app-inedostup, context: Unit tests, status: pending}
 
     - aggregate:
       - task: lint
@@ -35,9 +35,6 @@ jobs:
       passed: ['Initial testing']
       trigger: true
 
-    - put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Master build, status: pending}
-
     - aggregate:
       - task: build linux
         file: super-app-inedostup/tutorial/scenario.4/tasks/build_linux.yml
@@ -49,12 +46,13 @@ jobs:
         file: super-app-inedostup/tutorial/scenario.4/tasks/build_windows.yml
 
     - put: release-rc
+      params: {path: super-app-inedostup, context: Master build, status: pending}
 
 
-    on_failure:
-      put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Master build, status: failure}
-
-    on_success:
-      put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Master build, status: success}
+#    on_failure:
+#      put: release-rc
+#      params: {path: super-app-inedostup, context: Master build, status: failure}
+#
+#    on_success:
+#      put: release-rc
+#      params: {path: super-app-inedostup, context: Master build, status: success}
