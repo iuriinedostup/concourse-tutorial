@@ -53,9 +53,8 @@ jobs:
 
     on_failure:
       put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Unit tests, status: failure}
+      params: {path: super-app-inedostup, context: Building and integration tests, status: failure}
 
     on_success:
       put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Unit tests, status: success}
-
+      params: {path: super-app-inedostup, context: Building and integration tests, status: success}

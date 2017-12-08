@@ -12,8 +12,8 @@ run:
     ./scripts/go_deps.sh
     ./scripts/go_build.sh linux 0.0.1
     mv super_*_linux_amd64 ../artifact_linux
-  dir: super-app/
+  dir: super-app-inedostup/
 inputs:
-  - name: super-app
+  - name: super-app-inedostup
 outputs:
   - name: artifact_linux
