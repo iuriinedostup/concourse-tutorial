@@ -27,6 +27,15 @@ jobs:
       - task: unit
         file: super-app-inedostup/ci/tasks/unit.yml
 
+    on_failure:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: failure}
+
+    on_success:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: success}
+
+
   - name: Building and integration test
     plan:
     - get: super-app-inedostup
@@ -34,10 +43,19 @@ jobs:
       trigger: true
 
     - put: super-app-inedostup
-      params: {path: super-app-inedostup, context: Unit tests, status: pending}
+      params: {path: super-app-inedostup, context: Building and integration tests, status: pending}
 
     - task: build
       file: super-app-inedostup/ci/tasks/build.yml
 
     - task: integration test
       file: super-app-inedostup/ci/tasks/integration.yml
+
+    on_failure:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: failure}
+
+    on_success:
+      put: super-app-inedostup
+      params: {path: super-app-inedostup, context: Unit tests, status: success}
+
